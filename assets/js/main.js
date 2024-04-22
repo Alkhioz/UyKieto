@@ -74,6 +74,7 @@ const endActionHandler = () => {
 
 const nextActionHandler = () => {
     renderCard();
+    restartBoard();
 }
 
 const appendGameFunctions = () => {
