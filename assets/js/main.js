@@ -12,6 +12,7 @@ let body = null;
 let intervalId = null;
 const TIME_LIMIT = 10;
 let players = [];
+let cards = [];
 
 const disableAction = (evt) => {
     evt.target.classList.add("disabled-action");
@@ -70,6 +71,10 @@ const endActionHandler = () => {
     showConfigurationScreen();
 }
 
+const nextActionHandler = () => {
+    renderCard();
+}
+
 const appendGameFunctions = () => {
     const restartAction = document.querySelector("#restart-action");
     restartAction.addEventListener("click", restartBoard);
@@ -77,10 +82,39 @@ const appendGameFunctions = () => {
     clockAction.addEventListener("click", countdown);
     const endAction = document.querySelector("#end-action");
     endAction.addEventListener("click", endActionHandler);
+    const nextAction = document.querySelector("#next-action");
+    nextAction.addEventListener("click", nextActionHandler);
 }
 
-const showGameScreen = () => {
-    if(players.length < 2) {
+const renderCard = () => {
+    if(cards.length === 0) return false;
+    const newCard = cards.shift();
+    const card = document.querySelector("#card");
+    card.innerText = newCard.value;
+}
+
+const getCards = async () => {
+    try {
+        const response = await fetch('./cards.json');
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        const data = await response.json();
+        for (let i = data.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = data[i];
+            data[i] = data[j];
+            data[j] = temp;
+        }
+        cards = [...data];
+        renderCard();
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+const showGameScreen = async () => {
+    if (players.length < 2) {
         alert("Debe haber al menos dos jugadores")
         return false;
     }
@@ -90,7 +124,8 @@ const showGameScreen = () => {
     menuContainer.id = "menu-container";
     const card = document.createElement("div");
     card.classList.add("card");
-    card.innerHTML = "Comida ecuatoriana";
+    card.id = "card";
+    card.innerHTML = "";
     const nextAction = document.createElement("button");
     nextAction.classList.add("next-action");
     nextAction.id = "next-action";
@@ -132,17 +167,18 @@ const showGameScreen = () => {
     body.appendChild(alphabetContainer);
     body.appendChild(timerContainer);
     createAlphabet();
+    await getCards();
     appendGameFunctions();
 }
 
 
 const removePlayer = (position) => {
-    players = players.filter((e, index)=>index!==position);
+    players = players.filter((e, index) => index !== position);
     renderPlayers();
 }
 
 const renderPlayers = () => {
-    if(players.length === 0) return 0;
+    if (players.length === 0) return 0;
     const playerList = document.querySelector("#player-list");
     playerList.innerHTML = "";
     for (let [index, playerObject] of players.entries()) {
@@ -155,7 +191,7 @@ const renderPlayers = () => {
         playerRemoveAction.classList.add("remove-player-action");
         playerRemoveAction.id = "remove-player-action";
         playerRemoveAction.innerText = "X";
-        playerRemoveAction.addEventListener("click", ()=>removePlayer(index));
+        playerRemoveAction.addEventListener("click", () => removePlayer(index));
         player.appendChild(playerName);
         player.appendChild(playerRemoveAction);
         playerList.appendChild(player);
