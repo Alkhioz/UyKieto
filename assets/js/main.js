@@ -308,6 +308,7 @@ const showConfigurationScreen = () => {
     body.appendChild(configurationContainer);
     body.appendChild(startContainer);
     appendConfigurationFunctions();
+    renderPlayers();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
