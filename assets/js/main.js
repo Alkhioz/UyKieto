@@ -10,7 +10,8 @@ const Alphabet = [
 
 let body = null;
 let intervalId = null;
-const TIME_LIMIT = 10;
+let TIME_LIMIT = 10;
+let ROUNDS = 5;
 let players = [];
 let cards = [];
 
@@ -106,7 +107,11 @@ const getCards = async () => {
             data[i] = data[j];
             data[j] = temp;
         }
-        cards = [...data];
+        if(data.length > ROUNDS){
+            cards = [...data.slice(0, ROUNDS)];
+        }else {
+            cards = [...data];
+        }
         renderCard();
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
@@ -118,6 +123,8 @@ const showGameScreen = async () => {
         alert("Debe haber al menos dos jugadores")
         return false;
     }
+    ROUNDS = document.querySelector("#rounds")?.value ?? 5;
+    TIME_LIMIT = document.querySelector("#time")?.value ?? 10;
     body.innerHTML = "";
     const menuContainer = document.createElement("section");
     menuContainer.classList.add("menu-container");
